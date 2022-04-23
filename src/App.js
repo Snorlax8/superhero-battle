@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import HeroTeam from './components/HeroTeam/HeroTeam';
+import { getRandomNumber } from './utils';
 
 function App() {
   const [firstTeam, setFirstTeam] = useState([]);
+  const [firstTeamAlignment, setFirstTeamAlignment] = useState('');
   const [secondTeam, setSecondTeam] = useState([]);
+  const [secondTeamAlignment, setSecondTeamAlignment] = useState('');
 
   const getHeroIds = () => {
     var heroIds = new Set();
     while (heroIds.size !== 10) {
-      heroIds.add(Math.floor(Math.random() * 731));
+      heroIds.add(getRandomNumber(731));
     }
     return heroIds;
   };
@@ -36,17 +39,49 @@ function App() {
     }
   };
 
+  const getTeamAlignment = team => {
+    var goodCount = 0;
+    var badCount = 0;
+    team.forEach(member => {
+      if (member.biography.alignment === 'bad') {
+        badCount += 1;
+      } else {
+        goodCount += 1;
+      }
+    });
+    return goodCount >= badCount ? 'good' : 'bad';
+  };
+
+  useEffect(() => {
+    if (firstTeam.length > 0) {
+      setFirstTeamAlignment(getTeamAlignment(firstTeam));
+    }
+  }, [firstTeam]);
+
+  useEffect(() => {
+    if (secondTeam.length > 0) {
+      setSecondTeamAlignment(getTeamAlignment(secondTeam));
+    }
+  }, [secondTeam]);
+
   useEffect(() => {
     getSuperhero();
   }, []);
-
   return (
     <div className="App">
-      <HeroTeam heroes={firstTeam} top={true} />
+      <HeroTeam
+        heroes={firstTeam}
+        top={true}
+        teamAlignment={firstTeamAlignment}
+      />
       <div className="team-name">Equipo 1</div>
       <div className="divider"></div>
       <div className="team-name">Equipo 2</div>
-      <HeroTeam heroes={secondTeam} top={false} />
+      <HeroTeam
+        heroes={secondTeam}
+        top={false}
+        teamAlignment={secondTeamAlignment}
+      />
     </div>
   );
 }
