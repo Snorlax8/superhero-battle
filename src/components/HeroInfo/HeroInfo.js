@@ -3,6 +3,19 @@ import './HeroInfo.css';
 import { getRandomNumber } from '../../utils';
 
 const HeroInfo = ({ hero, teamAlignment }) => {
+  const processStat = stat => {
+    if (stat && stat !== 'null') return parseInt(stat, 10);
+    else return getRandomNumber(100);
+  };
+  var heroStats = {
+    intelligence: processStat(hero.powerstats.intelligence),
+    strength: processStat(hero.powerstats.strength),
+    speed: processStat(hero.powerstats.speed),
+    durability: processStat(hero.powerstats.durability),
+    power: processStat(hero.powerstats.power),
+    combat: processStat(hero.powerstats.combat),
+  };
+
   const getFiliationCoefficient = () => {
     const modifier = 1 + getRandomNumber(9);
     const heroAlignment = hero.biography.alignment;
@@ -23,27 +36,12 @@ const HeroInfo = ({ hero, teamAlignment }) => {
   return (
     <div className="hero-info">
       <div>{hero.name}</div>
-      <div>
-        IN: {hero.powerstats.intelligence},{' '}
-        {getActualStat(hero.powerstats.intelligence)}
-      </div>
-      <div>
-        STR: {hero.powerstats.strength},{' '}
-        {getActualStat(hero.powerstats.strength)}
-      </div>
-      <div>
-        SP: {hero.powerstats.speed}, {getActualStat(hero.powerstats.speed)}
-      </div>
-      <div>
-        DRB: {hero.powerstats.durability},{' '}
-        {getActualStat(hero.powerstats.durability)}
-      </div>
-      <div>
-        PWR: {hero.powerstats.power}, {getActualStat(hero.powerstats.power)}
-      </div>
-      <div>
-        CBT: {hero.powerstats.combat}, {getActualStat(hero.powerstats.combat)}
-      </div>
+      <div>IN: {getActualStat(heroStats.intelligence)}</div>
+      <div>STR: {getActualStat(heroStats.strength)}</div>
+      <div>SP: {getActualStat(heroStats.speed)}</div>
+      <div>DRB: {getActualStat(heroStats.durability)}</div>
+      <div>PWR: {getActualStat(heroStats.power)}</div>
+      <div>CBT: {getActualStat(heroStats.combat)}</div>
     </div>
   );
 };
