@@ -4,10 +4,8 @@ import HeroTeam from './components/HeroTeam/HeroTeam';
 import { getRandomNumber } from './utils';
 
 function App() {
-  const [firstTeam, setFirstTeam] = useState([]);
-  const [firstTeamAlignment, setFirstTeamAlignment] = useState('');
-  const [secondTeam, setSecondTeam] = useState([]);
-  const [secondTeamAlignment, setSecondTeamAlignment] = useState('');
+  const [teams, setTeams] = useState([]);
+  const [readyToLoad, setReadyToLoad] = useState(false);
 
   const getHeroIds = () => {
     var heroIds = new Set();
@@ -32,8 +30,16 @@ function App() {
           heroes.push(data);
         })
       );
-      setFirstTeam(heroes.slice(0, 5));
-      setSecondTeam(heroes.slice(5, 10));
+      const firstTeam = heroes.slice(0, 5);
+      const firstTeamAlignment = getTeamAlignment(firstTeam);
+
+      const secondTeam = heroes.slice(5, 10);
+      const secondTeamAlignment = getTeamAlignment(secondTeam);
+
+      setTeams([
+        { team: firstTeam, alignment: firstTeamAlignment },
+        { team: secondTeam, alignment: secondTeamAlignment },
+      ]);
     } catch (e) {
       console.error(e);
     }
@@ -53,35 +59,33 @@ function App() {
   };
 
   useEffect(() => {
-    if (firstTeam.length > 0) {
-      setFirstTeamAlignment(getTeamAlignment(firstTeam));
+    if (teams.length > 0) {
+      setReadyToLoad(true);
     }
-  }, [firstTeam]);
-
-  useEffect(() => {
-    if (secondTeam.length > 0) {
-      setSecondTeamAlignment(getTeamAlignment(secondTeam));
-    }
-  }, [secondTeam]);
+  }, [teams]);
 
   useEffect(() => {
     getSuperhero();
   }, []);
   return (
-    <div className="App">
-      <HeroTeam
-        heroes={firstTeam}
-        top={true}
-        teamAlignment={firstTeamAlignment}
-      />
-      <div className="team-name">Equipo 1</div>
-      <div className="divider"></div>
-      <div className="team-name">Equipo 2</div>
-      <HeroTeam
-        heroes={secondTeam}
-        top={false}
-        teamAlignment={secondTeamAlignment}
-      />
+    <div>
+      {readyToLoad && (
+        <div className="App">
+          <HeroTeam
+            heroes={teams[0].team}
+            top={true}
+            teamAlignment={teams[0].alignment}
+          />
+          <div className="team-name">Equipo 1</div>
+          <div className="divider"></div>
+          <div className="team-name">Equipo 2</div>
+          <HeroTeam
+            heroes={teams[1].team}
+            top={false}
+            teamAlignment={teams[1].alignment}
+          />
+        </div>
+      )}
     </div>
   );
 }
