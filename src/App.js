@@ -8,6 +8,8 @@ function App() {
   const [readyToLoad, setReadyToLoad] = useState(false);
   const [battleText, setBattleText] = useState([]);
   const [round, setRound] = useState(0);
+  const [battleEnded, setBattleEnded] = useState(false);
+  const [clearingBattle, setClearingBattle] = useState(false);
 
   const getHeroIds = () => {
     var heroIds = new Set();
@@ -208,9 +210,17 @@ function App() {
 
   const getRoundWinningTeamText = (winningTeam, losingTeam) => {
     return {
-      text: `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} ha vencido!`,
+      text: `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
       class: '',
       emojiCode: '0x1F3C6',
+    };
+  };
+
+  const getRoundTieText = () => {
+    return {
+      text: `¡Es un empate! Ningún equipo ha salido victorioso.`,
+      class: '',
+      emojiCode: '0x26d4',
     };
   };
 
@@ -226,26 +236,33 @@ function App() {
     setRound(round + 1);
   };
 
-  const beginRound = () => {
-    var beginText = {
-      text: `¡Empieza la ronda ${round}! El equipo 1 comienza con su ataque.`,
-      class: '',
-      emojiCode: '0x1F4E3',
-    };
-    var aliveHeroesFirstTeam = teams[0].filter(hero => hero.hp > 0);
-    var aliveHeroesSecondTeam = teams[1].filter(hero => hero.hp > 0);
-    var roundBattleText = [beginText];
-    aliveHeroesFirstTeam.forEach(hero => {
-      if (aliveHeroesSecondTeam.length > 0) {
-        const randomIndex = getRandomNumber(aliveHeroesSecondTeam.length - 1);
-        const opponent = aliveHeroesSecondTeam[randomIndex];
+  const clearBattle = () => {
+    setClearingBattle(true);
+    setBattleEnded(false);
+    getSuperhero();
+    setRound(0);
+  };
+
+  const heroBattle = (attackingTeam, opposingTeam, beginText = '') => {
+    var attackText = [
+      {
+        text: `Ataca el equipo ${attackingTeam.name}`,
+        class: '',
+        emojiCode: '0x1F93C',
+      },
+    ];
+    var roundBattleText = [...beginText, ...attackText];
+    attackingTeam.members.forEach(hero => {
+      if (opposingTeam.members.length > 0) {
+        const randomIndex = getRandomNumber(opposingTeam.members.length - 1);
+        const opponent = opposingTeam.members[randomIndex];
         const attack = heroAttack(hero);
         opponent.hp -= attack.damage;
         roundBattleText = [
           ...roundBattleText,
           ...getRoundBattleText(hero, opponent, attack),
         ];
-        if (opponent.hp <= 0) aliveHeroesSecondTeam.splice(randomIndex, 1);
+        if (opponent.hp <= 0) opposingTeam.members.splice(randomIndex, 1);
       } else {
         roundBattleText = [
           ...roundBattleText,
@@ -257,58 +274,81 @@ function App() {
         ];
       }
     });
-    if (aliveHeroesSecondTeam.length === 0) {
-      roundBattleText = [...roundBattleText, getRoundWinningTeamText(1, 2)];
+
+    if (opposingTeam.members.length === 0) {
+      var finalText =
+        attackingTeam.members.length > 0
+          ? getRoundWinningTeamText(attackingTeam.name, opposingTeam.name)
+          : getRoundTieText();
+
+      roundBattleText = [...roundBattleText, finalText];
+      setBattleEnded(true);
     }
-    displayText(roundBattleText);
+    return roundBattleText;
+  };
 
-    // if (aliveHeroesFirstTeam.length > 0) {
-    //   setBattleText([...battleText, '¡Turno del equipo 2!']);
+  const getTeamAttackText = (
+    attackingTeam,
+    opposingTeam,
+    roundBattleText,
+    beginText = ''
+  ) => {
+    if (attackingTeam.members.length > 0 && opposingTeam.members.length > 0) {
+      roundBattleText = [
+        ...roundBattleText,
+        ...heroBattle(attackingTeam, opposingTeam, beginText),
+      ];
+    }
+    return roundBattleText;
+  };
 
-    //   aliveHeroesSecondTeam.forEach(hero => {
-    //     const randomIndex = getRandomNumber(aliveHeroesFirstTeam.length - 1);
-    //     const opponent = aliveHeroesFirstTeam[randomIndex];
-    //     const attack = heroAttack(hero);
-    //     console.log('random index es', randomIndex);
-    //     console.log('opponent es', opponent);
-    //     roundBattleText = [
-    //       ...roundBattleText,
-    //       `¡El héroe ${hero.name} ataca al héroe ${opponent.name}!`,
-    //       `${hero.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
-    //       `${opponent.name} queda con ${opponent.hp} de HP.`,
-    //     ];
-    //     console.log('Atacará el héroe', hero.name);
-    //     console.log('Fue atacado el héroe', opponent.name);
-    //     console.log(
-    //       'El héroe atacado comenzó la ronda con esta hp',
-    //       opponent.hp
-    //     );
-    //     opponent.hp -= attack.damage;
-    //     console.log('El héroe atacante hizo un ataque de tipo', attack.type);
-    //     console.log('El héroe atacante hizo el siguiente daño', attack.damage);
-    //     console.log(
-    //       'El héroe atacado terminó la ronda con esta hp',
-    //       opponent.hp
-    //     );
-    //   });
-    // } else {
-    //   roundBattleText = [
-    //     ...roundBattleText,
-    //     'No quedan integrantes del equipo 1 en pie. ¡El equipo 2 ha vencido!',
-    //   ];
-    // }
-    // setBattleText(roundBattleText);
+  const beginRound = () => {
+    var roundBattleText = [];
+    var aliveHeroesFirstTeam = {
+      members: teams[0].filter(hero => hero.hp > 0),
+      name: '1',
+    };
+    var aliveHeroesSecondTeam = {
+      members: teams[1].filter(hero => hero.hp > 0),
+      name: '2',
+    };
+    var teamsAlive = [aliveHeroesFirstTeam, aliveHeroesSecondTeam];
+    var beginText = [
+      {
+        text: `¡Empieza la ronda ${round}!`,
+        class: '',
+        emojiCode: '0x1F4E3',
+      },
+    ];
+    var startingTeam = getRandomNumber(1);
+
+    roundBattleText = getTeamAttackText(
+      teamsAlive[startingTeam],
+      teamsAlive[1 - startingTeam],
+      roundBattleText,
+      beginText
+    );
+
+    roundBattleText = getTeamAttackText(
+      teamsAlive[1 - startingTeam],
+      teamsAlive[startingTeam],
+      roundBattleText
+    );
+
+    if (roundBattleText.length > 0) {
+      displayText(roundBattleText);
+    }
   };
 
   useEffect(() => {
-    if (round > 0) {
-      beginRound();
-    }
+    if (round > 0) beginRound();
+    else setBattleText([]);
   }, [round]);
 
   useEffect(() => {
     if (teams.length > 0) {
       setReadyToLoad(true);
+      setClearingBattle(false);
     }
   }, [teams]);
 
@@ -323,9 +363,29 @@ function App() {
           <HeroTeam heroes={teams[0]} top={true} />
           <div className="team-name">Equipo 1</div>
           <div className="begin-battle-container">
-            <div className="begin-battle">
-              Para comenzar una batalla, haz click en el botón:
-              <button onClick={() => buttonClicked()}>Pelear una ronda</button>
+            <div>
+              {!battleEnded && (
+                <div className="begin-battle">
+                  Para comenzar una batalla, haz click en el botón:
+                  <button
+                    disabled={clearingBattle}
+                    onClick={() => buttonClicked()}
+                  >
+                    Pelear una ronda
+                  </button>
+                </div>
+              )}
+              <div className="begin-battle"></div>
+              <div>
+                {battleEnded && (
+                  <div>
+                    La batalla terminó. ¿Quieres empezar otra ronda?{' '}
+                    <button onClick={() => clearBattle()}>
+                      Comenzar otra batalla
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="divider">
