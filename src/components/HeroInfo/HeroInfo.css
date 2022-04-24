@@ -2,4 +2,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 10px;
+}
+
+.hero-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.stat-name {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.hp {
+  color: green;
 }
