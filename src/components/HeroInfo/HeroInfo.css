@@ -18,6 +18,10 @@
   font-size: 14px;
 }
 
-.hp {
+.hp-alive {
   color: green;
+}
+
+.hp-dead {
+  color: red;
 }

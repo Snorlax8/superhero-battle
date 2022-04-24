@@ -23,7 +23,7 @@ const HeroInfo = ({ hero }) => {
       <div>
         <span className="stat-name">CBT:</span> {hero.powerstats.combat}
       </div>
-      <div className="hp">
+      <div className={hero.hp > 0 ? 'hp-alive' : 'hp-dead'}>
         <span className="stat-name">HP:</span> {hero.hp}
       </div>
     </div>
