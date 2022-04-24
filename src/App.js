@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import HeroTeam from './components/HeroTeam/HeroTeam';
-import { getRandomNumber } from './utils';
+import { getRandomNumber, sendMail } from './utils';
+import { BACKEND_URL } from './constants';
 
 function App() {
   const [teams, setTeams] = useState([]);
@@ -10,6 +11,8 @@ function App() {
   const [round, setRound] = useState(0);
   const [battleEnded, setBattleEnded] = useState(false);
   const [clearingBattle, setClearingBattle] = useState(false);
+  const [mail, setMail] = useState('');
+  const [mailBody, setMailBody] = useState('');
 
   const getHeroIds = () => {
     var heroIds = new Set();
@@ -95,12 +98,12 @@ function App() {
     return newMember;
   };
 
-  const processTeam = (team, teamAlignment) => {
-    var newTeam = [];
+  const processTeam = (team, teamAlignment, name) => {
+    var newMembers = [];
     team.forEach(member => {
-      newTeam.push(setActualStats(member, teamAlignment));
+      newMembers.push(setActualStats(member, teamAlignment));
     });
-    return newTeam;
+    return { members: newMembers, name };
   };
 
   const getSuperhero = async () => {
@@ -109,7 +112,7 @@ function App() {
       const heroes = [];
       await Promise.all(
         heroIds.map(async id => {
-          const response = await fetch(process.env.REACT_APP_BACKEND_URL, {
+          const response = await fetch(BACKEND_URL, {
             headers: { 'Content-Type': 'application/json' },
             method: 'post',
             body: JSON.stringify({ id }),
@@ -120,11 +123,19 @@ function App() {
       );
       const firstTeam = heroes.slice(0, 5);
       const firstTeamAlignment = getTeamAlignment(firstTeam);
-      const processedFirstTeam = processTeam(firstTeam, firstTeamAlignment);
+      const processedFirstTeam = processTeam(
+        firstTeam,
+        firstTeamAlignment,
+        '1'
+      );
 
       const secondTeam = heroes.slice(5, 10);
       const secondTeamAlignment = getTeamAlignment(secondTeam);
-      const processedSecondTeam = processTeam(secondTeam, secondTeamAlignment);
+      const processedSecondTeam = processTeam(
+        secondTeam,
+        secondTeamAlignment,
+        '2'
+      );
 
       setTeams([processedFirstTeam, processedSecondTeam]);
     } catch (e) {
@@ -232,8 +243,30 @@ function App() {
     return String.fromCodePoint(emojiCode);
   };
 
-  const buttonClicked = () => {
+  const startRound = () => {
     setRound(round + 1);
+  };
+
+  const getEmailBody = (winningTeam, losingTeam, tie) => {
+    var winningTeamMembers = '';
+    winningTeam.members.forEach((member, index) => {
+      if (index !== winningTeam.members.length - 1) {
+        winningTeamMembers = winningTeamMembers.concat(`${member.name}, `);
+      } else
+        winningTeamMembers = winningTeamMembers.concat(`y ${member.name}.`);
+    });
+
+    var losingTeamMembers = '';
+    losingTeam.members.forEach((member, index) => {
+      if (index !== losingTeam.members.length - 1) {
+        losingTeamMembers = losingTeamMembers.concat(`${member.name}, `);
+      } else losingTeamMembers = losingTeamMembers.concat(`y ${member.name}.`);
+    });
+
+    var winningText = tie
+      ? '¡El resultado fue un empate! No hubo equipo ganador.'
+      : `¡El <b>equipo ${winningTeam.name}</b> resultó victorioso!`;
+    return `<div><p>El equipo ${winningTeam.name} estuvo compuesto por: ${winningTeamMembers}</p> <p>El equipo ${losingTeam.name} estuvo compuesto por: ${losingTeamMembers}</p> <p>${winningText}</p></div>`;
   };
 
   const clearBattle = () => {
@@ -276,12 +309,18 @@ function App() {
     });
 
     if (opposingTeam.members.length === 0) {
-      var finalText =
-        attackingTeam.members.length > 0
-          ? getRoundWinningTeamText(attackingTeam.name, opposingTeam.name)
-          : getRoundTieText();
+      var tie = attackingTeam.members.length === 0;
+      var finalText = tie
+        ? getRoundTieText()
+        : getRoundWinningTeamText(attackingTeam.name, opposingTeam.name);
 
       roundBattleText = [...roundBattleText, finalText];
+      var emailBody = '';
+      attackingTeam.name === '1'
+        ? (emailBody = getEmailBody(teams[0], teams[1], tie))
+        : (emailBody = getEmailBody(teams[1], teams[0], tie));
+
+      setMailBody(emailBody);
       setBattleEnded(true);
     }
     return roundBattleText;
@@ -305,12 +344,12 @@ function App() {
   const beginRound = () => {
     var roundBattleText = [];
     var aliveHeroesFirstTeam = {
-      members: teams[0].filter(hero => hero.hp > 0),
-      name: '1',
+      members: teams[0].members.filter(hero => hero.hp > 0),
+      name: teams[0].name,
     };
     var aliveHeroesSecondTeam = {
-      members: teams[1].filter(hero => hero.hp > 0),
-      name: '2',
+      members: teams[1].members.filter(hero => hero.hp > 0),
+      name: teams[1].name,
     };
     var teamsAlive = [aliveHeroesFirstTeam, aliveHeroesSecondTeam];
     var beginText = [
@@ -360,16 +399,16 @@ function App() {
     <div>
       {readyToLoad && (
         <div className="App">
-          <HeroTeam heroes={teams[0]} top={true} />
+          <HeroTeam heroes={teams[0].members} top={true} />
           <div className="team-name">Equipo 1</div>
           <div className="begin-battle-container">
             <div>
               {!battleEnded && (
                 <div className="begin-battle">
-                  Para comenzar una batalla, haz click en el botón:
+                  Para comenzar una ronda, haz click en el botón:
                   <button
                     disabled={clearingBattle}
-                    onClick={() => buttonClicked()}
+                    onClick={() => startRound()}
                   >
                     Pelear una ronda
                   </button>
@@ -379,7 +418,18 @@ function App() {
               <div>
                 {battleEnded && (
                   <div>
-                    La batalla terminó. ¿Quieres empezar otra ronda?{' '}
+                    La batalla terminó. Puedes ingresar tu mail para recibir un
+                    resumen o comenzar otra batalla.
+                    <div>
+                      <input
+                        placeholder="Ingresar mail"
+                        value={mail}
+                        onChange={e => setMail(e.target.value)}
+                      ></input>
+                      <button onClick={() => sendMail(mailBody, mail)}>
+                        Enviar mail
+                      </button>
+                    </div>
                     <button onClick={() => clearBattle()}>
                       Comenzar otra batalla
                     </button>
@@ -397,7 +447,7 @@ function App() {
             ))}
           </div>
           <div className="team-name">Equipo 2</div>
-          <HeroTeam heroes={teams[1]} top={false} />
+          <HeroTeam heroes={teams[1].members} top={false} />
         </div>
       )}
     </div>
