@@ -7,6 +7,7 @@ function App() {
   const [teams, setTeams] = useState([]);
   const [readyToLoad, setReadyToLoad] = useState(false);
   const [battleText, setBattleText] = useState([]);
+  const [round, setRound] = useState(0);
 
   const getHeroIds = () => {
     var heroIds = new Set();
@@ -180,86 +181,130 @@ function App() {
     }
   };
 
+  const getRoundBattleText = (attacker, opponent, attack) => {
+    return [
+      {
+        text: `¡${attacker.name} ataca a ${opponent.name}!`,
+        class: '',
+        emojiCode: '0x1F4A5',
+      },
+      {
+        text: `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
+        class: '',
+        emojiCode:
+          attack.type === 'Strong'
+            ? '0x1F4AA'
+            : attack.type === 'Fast'
+            ? '0x23E9'
+            : '0x1F9E0',
+      },
+      {
+        text: `${opponent.name} queda con ${opponent.hp} de HP.`,
+        class: '',
+        emojiCode: opponent.hp > 0 ? '0x1F9B8' : '0x1FAA6',
+      },
+    ];
+  };
+
+  const getRoundWinningTeamText = (winningTeam, losingTeam) => {
+    return {
+      text: `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} ha vencido!`,
+      class: '',
+      emojiCode: '0x1F3C6',
+    };
+  };
+
+  const displayText = textArray => {
+    setBattleText([...battleText, ...textArray]);
+  };
+
+  const getEmojiString = emojiCode => {
+    return String.fromCodePoint(emojiCode);
+  };
+
+  const buttonClicked = () => {
+    setRound(round + 1);
+  };
+
   const beginRound = () => {
-    setBattleText([
-      ...battleText,
-      '¡Comienza una nueva ronda! El equipo 1 comienza con su ataque.',
-    ]);
+    var beginText = {
+      text: `¡Empieza la ronda ${round}! El equipo 1 comienza con su ataque.`,
+      class: '',
+      emojiCode: '0x1F4E3',
+    };
     var aliveHeroesFirstTeam = teams[0].filter(hero => hero.hp > 0);
     var aliveHeroesSecondTeam = teams[1].filter(hero => hero.hp > 0);
-    var roundBattleText = battleText;
-    if (aliveHeroesSecondTeam.length > 0) {
-      aliveHeroesFirstTeam.forEach(hero => {
+    var roundBattleText = [beginText];
+    aliveHeroesFirstTeam.forEach(hero => {
+      if (aliveHeroesSecondTeam.length > 0) {
         const randomIndex = getRandomNumber(aliveHeroesSecondTeam.length - 1);
         const opponent = aliveHeroesSecondTeam[randomIndex];
         const attack = heroAttack(hero);
-        console.log('random index es', randomIndex);
-        console.log('opponent es', opponent);
+        opponent.hp -= attack.damage;
         roundBattleText = [
           ...roundBattleText,
-          `¡El héroe ${hero.name} ataca al héroe ${opponent.name}!`,
-          `${hero.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
-          `${opponent.name} queda con ${opponent.hp} de HP.`,
+          ...getRoundBattleText(hero, opponent, attack),
         ];
-        console.log('Atacará el héroe', hero.name);
-        console.log('Fue atacado el héroe', opponent.name);
-        console.log(
-          'El héroe atacado comenzó la ronda con esta hp',
-          opponent.hp
-        );
-        opponent.hp -= attack.damage;
-        console.log('El héroe atacante hizo un ataque de tipo', attack.type);
-        console.log('El héroe atacante hizo el siguiente daño', attack.damage);
-        console.log(
-          'El héroe atacado terminó la ronda con esta hp',
-          opponent.hp
-        );
-      });
-    } else {
-      roundBattleText = [
-        ...roundBattleText,
-        'No quedan integrantes del equipo 2 en pie. ¡El equipo 1 ha vencido!',
-      ];
-    }
-    setBattleText(roundBattleText);
-
-    if (aliveHeroesFirstTeam.length > 0) {
-      setBattleText([...battleText, '¡Turno del equipo 2!']);
-
-      aliveHeroesSecondTeam.forEach(hero => {
-        const randomIndex = getRandomNumber(aliveHeroesFirstTeam.length - 1);
-        const opponent = aliveHeroesFirstTeam[randomIndex];
-        const attack = heroAttack(hero);
-        console.log('random index es', randomIndex);
-        console.log('opponent es', opponent);
+        if (opponent.hp <= 0) aliveHeroesSecondTeam.splice(randomIndex, 1);
+      } else {
         roundBattleText = [
           ...roundBattleText,
-          `¡El héroe ${hero.name} ataca al héroe ${opponent.name}!`,
-          `${hero.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
-          `${opponent.name} queda con ${opponent.hp} de HP.`,
+          {
+            text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
+            class: '',
+            emojiCode: '0x1f3d6',
+          },
         ];
-        console.log('Atacará el héroe', hero.name);
-        console.log('Fue atacado el héroe', opponent.name);
-        console.log(
-          'El héroe atacado comenzó la ronda con esta hp',
-          opponent.hp
-        );
-        opponent.hp -= attack.damage;
-        console.log('El héroe atacante hizo un ataque de tipo', attack.type);
-        console.log('El héroe atacante hizo el siguiente daño', attack.damage);
-        console.log(
-          'El héroe atacado terminó la ronda con esta hp',
-          opponent.hp
-        );
-      });
-    } else {
-      roundBattleText = [
-        ...roundBattleText,
-        'No quedan integrantes del equipo 1 en pie. ¡El equipo 2 ha vencido!',
-      ];
+      }
+    });
+    if (aliveHeroesSecondTeam.length === 0) {
+      roundBattleText = [...roundBattleText, getRoundWinningTeamText(1, 2)];
     }
-    setBattleText(roundBattleText);
+    displayText(roundBattleText);
+
+    // if (aliveHeroesFirstTeam.length > 0) {
+    //   setBattleText([...battleText, '¡Turno del equipo 2!']);
+
+    //   aliveHeroesSecondTeam.forEach(hero => {
+    //     const randomIndex = getRandomNumber(aliveHeroesFirstTeam.length - 1);
+    //     const opponent = aliveHeroesFirstTeam[randomIndex];
+    //     const attack = heroAttack(hero);
+    //     console.log('random index es', randomIndex);
+    //     console.log('opponent es', opponent);
+    //     roundBattleText = [
+    //       ...roundBattleText,
+    //       `¡El héroe ${hero.name} ataca al héroe ${opponent.name}!`,
+    //       `${hero.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
+    //       `${opponent.name} queda con ${opponent.hp} de HP.`,
+    //     ];
+    //     console.log('Atacará el héroe', hero.name);
+    //     console.log('Fue atacado el héroe', opponent.name);
+    //     console.log(
+    //       'El héroe atacado comenzó la ronda con esta hp',
+    //       opponent.hp
+    //     );
+    //     opponent.hp -= attack.damage;
+    //     console.log('El héroe atacante hizo un ataque de tipo', attack.type);
+    //     console.log('El héroe atacante hizo el siguiente daño', attack.damage);
+    //     console.log(
+    //       'El héroe atacado terminó la ronda con esta hp',
+    //       opponent.hp
+    //     );
+    //   });
+    // } else {
+    //   roundBattleText = [
+    //     ...roundBattleText,
+    //     'No quedan integrantes del equipo 1 en pie. ¡El equipo 2 ha vencido!',
+    //   ];
+    // }
+    // setBattleText(roundBattleText);
   };
+
+  useEffect(() => {
+    if (round > 0) {
+      beginRound();
+    }
+  }, [round]);
 
   useEffect(() => {
     if (teams.length > 0) {
@@ -270,6 +315,7 @@ function App() {
   useEffect(() => {
     getSuperhero();
   }, []);
+
   return (
     <div>
       {readyToLoad && (
@@ -279,12 +325,15 @@ function App() {
           <div className="begin-battle-container">
             <div className="begin-battle">
               Para comenzar una batalla, haz click en el botón:
-              <button onClick={() => beginRound()}>Pelear una ronda</button>
+              <button onClick={() => buttonClicked()}>Pelear una ronda</button>
             </div>
           </div>
           <div className="divider">
-            {battleText.map((text, index) => (
-              <div key={index}>{text}</div>
+            {battleText.map((textObject, index) => (
+              <div key={index}>
+                <span>{getEmojiString(textObject.emojiCode)} </span>
+                {textObject.text}
+              </div>
             ))}
           </div>
           <div className="team-name">Equipo 2</div>

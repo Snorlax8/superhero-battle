@@ -12,7 +12,7 @@ const HeroCard = ({ hero, top }) => {
     <div>
       {top && <HeroInfo hero={hero} />}
       <img
-        className="avatar"
+        className={`avatar ${hero.hp > 0 ? '' : 'avatar-dead'}`}
         src={hero.image.url}
         onError={addDefaultImage}
       ></img>
