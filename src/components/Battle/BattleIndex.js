@@ -3,6 +3,7 @@ import Proptypes from 'prop-types';
 import './Battle.css';
 import { getRandomNumber } from '../../utils';
 import BattleLayout from './BattleLayout';
+import { emojiCodes, AttackTypes } from './BattleConstants';
 
 function Battle({
   setBattleEnded,
@@ -42,13 +43,13 @@ function Battle({
     const type = getRandomNumber(3);
     switch (type) {
       case 1:
-        return { type: 'Mental', damage: getMentalAttackDmg(hero) };
+        return { type: AttackTypes.Mental, damage: getMentalAttackDmg(hero) };
       case 2:
-        return { type: 'Strong', damage: getStrongAttackDmg(hero) };
+        return { type: AttackTypes.Strong, damage: getStrongAttackDmg(hero) };
       case 3:
-        return { type: 'Fast', damage: getFastAttackDmg(hero) };
+        return { type: AttackTypes.Fast, damage: getFastAttackDmg(hero) };
       default:
-        return { type: 'Mental', damage: getStrongAttackDmg(hero) };
+        return { type: AttackTypes.Mental, damage: getStrongAttackDmg(hero) };
     }
   };
 
@@ -57,22 +58,22 @@ function Battle({
       {
         text: `¡${attacker.name} ataca a ${opponent.name}!`,
         class: '',
-        emojiCode: '0x1F4A5',
+        emojiCode: emojiCodes.collision,
       },
       {
         text: `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
         class: '',
         emojiCode:
           attack.type === 'Strong'
-            ? '0x1F4AA'
+            ? emojiCodes.bicep
             : attack.type === 'Fast'
-            ? '0x23E9'
-            : '0x1F9E0',
+            ? emojiCodes.fastForward
+            : emojiCodes.brain,
       },
       {
         text: `${opponent.name} queda con ${opponent.hp} de HP.`,
         class: '',
-        emojiCode: opponent.hp > 0 ? '0x1F9B8' : '0x1FAA6',
+        emojiCode: opponent.hp > 0 ? emojiCodes.hero : emojiCodes.tombStone,
       },
     ];
   };
@@ -81,7 +82,7 @@ function Battle({
     return {
       text: `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
       class: '',
-      emojiCode: '0x1F3C6',
+      emojiCode: emojiCodes.trophy,
     };
   };
 
@@ -89,7 +90,7 @@ function Battle({
     return {
       text: `¡Es un empate! Ningún equipo ha salido victorioso.`,
       class: '',
-      emojiCode: '0x26d4',
+      emojiCode: emojiCodes.noEntry,
     };
   };
 
@@ -144,7 +145,7 @@ function Battle({
     return {
       text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
       class: '',
-      emojiCode: '0x1f3d6',
+      emojiCode: emojiCodes.beach,
     };
   };
   const getHeroAttackText = (hero, opposingTeam) => {
@@ -174,7 +175,7 @@ function Battle({
       {
         text: `Ataca el equipo ${attackingTeam.name}`,
         class: '',
-        emojiCode: '0x1F93C',
+        emojiCode: emojiCodes.wrestling,
       },
     ];
     var teamAttackText = [...beginText, ...attackText];
@@ -216,7 +217,7 @@ function Battle({
       {
         text: `¡Empieza la ronda ${round}!`,
         class: '',
-        emojiCode: '0x1F4E3',
+        emojiCode: emojiCodes.megaphone,
       },
     ];
     var startingTeam = getRandomNumber(1);
