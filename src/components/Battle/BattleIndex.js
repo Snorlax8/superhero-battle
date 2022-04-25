@@ -133,6 +133,42 @@ function Battle({
     return getRoundBattleText(attacker, opponent, attack);
   };
 
+  const createMailBody = (attackingTeam, tie) => {
+    var emailBody = '';
+    attackingTeam.name === '1'
+      ? (emailBody = getEmailBody(teams[0], teams[1], tie))
+      : (emailBody = getEmailBody(teams[1], teams[0], tie));
+    setMailBody(emailBody);
+  };
+  const getHeroRestText = hero => {
+    return {
+      text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
+      class: '',
+      emojiCode: '0x1f3d6',
+    };
+  };
+  const getHeroAttackText = (hero, opposingTeam) => {
+    var heroAttackText = [];
+    if (opposingTeam.members.length > 0) {
+      heroAttackText.push(...attackOpponent(hero, opposingTeam));
+    } else {
+      heroAttackText.push(getHeroRestText(hero));
+    }
+    return heroAttackText;
+  };
+
+  const handleBattleEnd = (attackingTeam, opposingTeam, textToDisplay) => {
+    var tie = attackingTeam.members.length === 0;
+    var finalText = tie
+      ? getRoundTieText()
+      : getRoundWinningTeamText(attackingTeam.name, opposingTeam.name);
+    textToDisplay.push(finalText);
+
+    createMailBody(attackingTeam, tie);
+
+    setBattleEnded(true);
+  };
+
   const getHeroBattleText = (attackingTeam, opposingTeam, beginText = '') => {
     var attackText = [
       {
@@ -145,32 +181,12 @@ function Battle({
     var roundBattleText = [];
     var textToDisplay = [];
     attackingTeam.members.forEach(hero => {
-      if (opposingTeam.members.length > 0) {
-        roundBattleText.push(...attackOpponent(hero, opposingTeam));
-      } else {
-        roundBattleText.push({
-          text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
-          class: '',
-          emojiCode: '0x1f3d6',
-        });
-      }
+      roundBattleText.push(...getHeroAttackText(hero, opposingTeam));
     });
 
     textToDisplay = [...teamAttackText, ...roundBattleText];
     if (opposingTeam.members.length === 0) {
-      var tie = attackingTeam.members.length === 0;
-      var finalText = tie
-        ? getRoundTieText()
-        : getRoundWinningTeamText(attackingTeam.name, opposingTeam.name);
-      textToDisplay.push(finalText);
-
-      var emailBody = '';
-      attackingTeam.name === '1'
-        ? (emailBody = getEmailBody(teams[0], teams[1], tie))
-        : (emailBody = getEmailBody(teams[1], teams[0], tie));
-      setMailBody(emailBody);
-
-      setBattleEnded(true);
+      handleBattleEnd(attackingTeam, opposingTeam, textToDisplay);
     }
 
     return textToDisplay;
