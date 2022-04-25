@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import Battle from './components/Battle/BattleIndex';
-import HeroTeam from './components/HeroTeam/HeroTeam';
 import { getRandomNumber } from './utils';
 import { BACKEND_URL } from './constants';
-import Mail from './components/Mail/MailIndex';
+import App from './AppLayout';
 
-function App() {
+function AppIndex() {
   const [teams, setTeams] = useState([]);
   const [readyToLoad, setReadyToLoad] = useState(false);
   const [battleText, setBattleText] = useState([]);
@@ -182,53 +180,24 @@ function App() {
   return (
     <div>
       {readyToLoad && (
-        <div className="App">
-          <HeroTeam heroes={teams[0].members} top={true} />
-          <div className="team-name">Equipo 1</div>
-          <div className="begin-battle-container">
-            <div>
-              {!battleEnded && (
-                <Battle
-                  setBattleEnded={setBattleEnded}
-                  battleText={battleText}
-                  setBattleText={setBattleText}
-                  round={round}
-                  setRound={setRound}
-                  teams={teams}
-                  setTeams={setTeams}
-                  clearingBattle={clearingBattle}
-                  setMailBody={setMailBody}
-                />
-              )}
-              <div className="begin-battle"></div>
-              <div>
-                {battleEnded && (
-                  <div>
-                    La batalla terminó. Puedes ingresar tu mail para recibir un
-                    resumen o comenzar otra batalla.
-                    <Mail mailBody={mailBody} />
-                    <button onClick={() => clearBattle()}>
-                      Comenzar otra batalla
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="divider">
-            {battleText.map((textObject, index) => (
-              <div key={index}>
-                <span>{getEmojiString(textObject.emojiCode)} </span>
-                {textObject.text}
-              </div>
-            ))}
-          </div>
-          <div className="team-name">Equipo 2</div>
-          <HeroTeam heroes={teams[1].members} top={false} />
-        </div>
+        <App
+          teams={teams}
+          setTeams={setTeams}
+          battleEnded={battleEnded}
+          setBattleEnded={setBattleEnded}
+          battleText={battleText}
+          setBattleText={setBattleText}
+          round={round}
+          setRound={setRound}
+          clearingBattle={clearingBattle}
+          setMailBody={setMailBody}
+          mailBody={mailBody}
+          clearBattle={clearBattle}
+          getEmojiString={getEmojiString}
+        />
       )}
     </div>
   );
 }
 
-export default App;
+export default AppIndex;
