@@ -11,6 +11,7 @@ function AppIndex() {
   const [battleEnded, setBattleEnded] = useState(false);
   const [clearingBattle, setClearingBattle] = useState(false);
   const [mailBody, setMailBody] = useState('');
+
   const getHeroIds = () => {
     var heroIds = new Set();
     while (heroIds.size !== 10) {

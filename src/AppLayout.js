@@ -65,7 +65,6 @@ function App({
         <div className="team-name">Equipo 2</div>
         <HeroTeam heroes={teams[1].members} top={false} />
       </div>
-      {/* )} */}
     </div>
   );
 }

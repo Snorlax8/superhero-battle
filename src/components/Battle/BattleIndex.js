@@ -53,28 +53,31 @@ function Battle({
     }
   };
 
-  const getRoundBattleText = (attacker, opponent, attack) => {
+  const BattleText = (text, cssClass, emojiCode) => {
+    return { text, class: cssClass, emojiCode };
+  };
+
+  const attackTextToDisplay = (attacker, opponent, attack) => {
     return [
-      {
-        text: `¡${attacker.name} ataca a ${opponent.name}!`,
-        class: '',
-        emojiCode: emojiCodes.collision,
-      },
-      {
-        text: `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
-        class: '',
-        emojiCode:
-          attack.type === 'Strong'
-            ? emojiCodes.bicep
-            : attack.type === 'Fast'
-            ? emojiCodes.fastForward
-            : emojiCodes.brain,
-      },
-      {
-        text: `${opponent.name} queda con ${opponent.hp} de HP.`,
-        class: '',
-        emojiCode: opponent.hp > 0 ? emojiCodes.hero : emojiCodes.tombStone,
-      },
+      BattleText(
+        `¡${attacker.name} ataca a ${opponent.name}!`,
+        '',
+        emojiCodes.collision
+      ),
+      BattleText(
+        `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
+        '',
+        attack.type === 'Strong'
+          ? emojiCodes.bicep
+          : attack.type === 'Fast'
+          ? emojiCodes.fastForward
+          : emojiCodes.brain
+      ),
+      BattleText(
+        `${opponent.name} queda con ${opponent.hp} de HP.`,
+        '',
+        opponent.hp > 0 ? emojiCodes.hero : emojiCodes.tombStone
+      ),
     ];
   };
 
@@ -102,21 +105,19 @@ function Battle({
     setRound(round + 1);
   };
 
-  const getEmailBody = (winningTeam, losingTeam, tie) => {
-    var winningTeamMembers = '';
-    winningTeam.members.forEach((member, index) => {
-      if (index !== winningTeam.members.length - 1) {
-        winningTeamMembers = winningTeamMembers.concat(`${member.name}, `);
-      } else
-        winningTeamMembers = winningTeamMembers.concat(`y ${member.name}.`);
+  const getTeamMembersString = team => {
+    var teamMembers = '';
+    team.members.forEach((member, index) => {
+      if (index !== team.members.length - 1) {
+        teamMembers = teamMembers.concat(`${member.name}, `);
+      } else teamMembers = teamMembers.concat(`y ${member.name}.`);
     });
+    return teamMembers;
+  };
 
-    var losingTeamMembers = '';
-    losingTeam.members.forEach((member, index) => {
-      if (index !== losingTeam.members.length - 1) {
-        losingTeamMembers = losingTeamMembers.concat(`${member.name}, `);
-      } else losingTeamMembers = losingTeamMembers.concat(`y ${member.name}.`);
-    });
+  const getEmailBody = (winningTeam, losingTeam, tie) => {
+    var winningTeamMembers = getTeamMembersString(winningTeam);
+    var losingTeamMembers = getTeamMembersString(losingTeam);
 
     var winningText = tie
       ? '¡El resultado fue un empate! No hubo equipo ganador.'
@@ -131,7 +132,7 @@ function Battle({
     opponent.hp -= attack.damage;
     if (opponent.hp <= 0) opposingTeam.members.splice(randomIndex, 1);
 
-    return getRoundBattleText(attacker, opponent, attack);
+    return attackTextToDisplay(attacker, opponent, attack);
   };
 
   const createMailBody = (attackingTeam, tie) => {
@@ -141,6 +142,7 @@ function Battle({
       : (emailBody = getEmailBody(teams[1], teams[0], tie));
     setMailBody(emailBody);
   };
+
   const getHeroRestText = hero => {
     return {
       text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
@@ -148,6 +150,7 @@ function Battle({
       emojiCode: emojiCodes.beach,
     };
   };
+
   const getHeroAttackText = (hero, opposingTeam) => {
     var heroAttackText = [];
     if (opposingTeam.members.length > 0) {
@@ -170,7 +173,7 @@ function Battle({
     setBattleEnded(true);
   };
 
-  const getHeroBattleText = (attackingTeam, opposingTeam, beginText = '') => {
+  const getTeamAttackText = (attackingTeam, opposingTeam, beginText = '') => {
     var attackText = [
       {
         text: `Ataca el equipo ${attackingTeam.name}`,
@@ -179,13 +182,13 @@ function Battle({
       },
     ];
     var teamAttackText = [...beginText, ...attackText];
-    var roundBattleText = [];
+    var roundAttackText = [];
     var textToDisplay = [];
     attackingTeam.members.forEach(hero => {
-      roundBattleText.push(...getHeroAttackText(hero, opposingTeam));
+      roundAttackText.push(...getHeroAttackText(hero, opposingTeam));
     });
 
-    textToDisplay = [...teamAttackText, ...roundBattleText];
+    textToDisplay = [...teamAttackText, ...roundAttackText];
     if (opposingTeam.members.length === 0) {
       handleBattleEnd(attackingTeam, opposingTeam, textToDisplay);
     }
@@ -193,14 +196,14 @@ function Battle({
     return textToDisplay;
   };
 
-  const getTeamAttackText = (attackingTeam, opposingTeam, beginText = '') => {
-    var roundBattleText = [];
+  const getTeamRoundText = (attackingTeam, opposingTeam, beginText = '') => {
+    var roundAttackText = [];
     if (attackingTeam.members.length > 0 && opposingTeam.members.length > 0) {
-      roundBattleText = [
-        ...getHeroBattleText(attackingTeam, opposingTeam, beginText),
+      roundAttackText = [
+        ...getTeamAttackText(attackingTeam, opposingTeam, beginText),
       ];
     }
-    return roundBattleText;
+    return roundAttackText;
   };
 
   const beginRound = () => {
@@ -222,21 +225,21 @@ function Battle({
     ];
     var startingTeam = getRandomNumber(1);
 
-    var firstTeamBattleText = getTeamAttackText(
+    var firstTeamBattleText = getTeamRoundText(
       teamsAlive[startingTeam],
       teamsAlive[1 - startingTeam],
       beginText
     );
 
-    var secondTeamBattleText = getTeamAttackText(
+    var secondTeamBattleText = getTeamRoundText(
       teamsAlive[1 - startingTeam],
       teamsAlive[startingTeam]
     );
 
-    var roundBattleText = [...firstTeamBattleText, ...secondTeamBattleText];
+    var roundAttackText = [...firstTeamBattleText, ...secondTeamBattleText];
 
-    if (roundBattleText.length > 0) {
-      displayText(roundBattleText);
+    if (roundAttackText.length > 0) {
+      displayText(roundAttackText);
     }
   };
 
