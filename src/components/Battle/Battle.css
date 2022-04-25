@@ -1,0 +1,32 @@
+@font-face {
+  font-family: 'Monsterrat';
+  src: local('Montserrat'),
+    url(../../assets/fonts/Montserrat/Montserrat-Regular.ttf) format('truetype');
+}
+
+.team-name {
+  display: flex;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  margin: 20px 0 20px 0;
+}
+
+.divider {
+  height: 300px;
+  border: solid 2px;
+  margin-left: 50px;
+  margin-right: 50px;
+  overflow: scroll;
+}
+
+.begin-battle-container {
+  display: flex;
+  justify-content: center;
+}
+
+.begin-battle {
+  display: flex;
+  width: 50%;
+  justify-content: space-between;
+}
