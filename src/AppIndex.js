@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { getRandomNumber } from './utils';
-import { BACKEND_URL } from './constants';
+import { getRandomNumber, getSuperHero } from './utils';
 import App from './AppLayout';
 
 function AppIndex() {
@@ -97,7 +96,8 @@ function AppIndex() {
     return newMember;
   };
 
-  const processTeam = (team, teamAlignment, name) => {
+  const processTeam = (team, name) => {
+    const teamAlignment = getTeamAlignment(team);
     var newMembers = [];
     team.forEach(member => {
       newMembers.push(setActualStats(member, teamAlignment));
@@ -105,36 +105,21 @@ function AppIndex() {
     return { members: newMembers, name };
   };
 
-  const getSuperhero = async () => {
+  const formTeams = async () => {
     try {
       const heroIds = [...getHeroIds()];
       const heroes = [];
       await Promise.all(
         heroIds.map(async id => {
-          const response = await fetch(BACKEND_URL, {
-            headers: { 'Content-Type': 'application/json' },
-            method: 'post',
-            body: JSON.stringify({ id }),
-          });
-          const data = await response.json();
+          const data = await getSuperHero(id);
           heroes.push(processHeroData(data));
         })
       );
       const firstTeam = heroes.slice(0, 5);
-      const firstTeamAlignment = getTeamAlignment(firstTeam);
-      const processedFirstTeam = processTeam(
-        firstTeam,
-        firstTeamAlignment,
-        '1'
-      );
+      const processedFirstTeam = processTeam(firstTeam, '1');
 
       const secondTeam = heroes.slice(5, 10);
-      const secondTeamAlignment = getTeamAlignment(secondTeam);
-      const processedSecondTeam = processTeam(
-        secondTeam,
-        secondTeamAlignment,
-        '2'
-      );
+      const processedSecondTeam = processTeam(secondTeam, '2');
 
       setTeams([processedFirstTeam, processedSecondTeam]);
     } catch (e) {
@@ -155,14 +140,10 @@ function AppIndex() {
     return goodCount >= badCount ? 'good' : 'bad';
   };
 
-  const getEmojiString = emojiCode => {
-    return String.fromCodePoint(emojiCode);
-  };
-
   const clearBattle = () => {
     setClearingBattle(true);
     setBattleEnded(false);
-    getSuperhero();
+    formTeams();
     setRound(0);
   };
 
@@ -174,7 +155,7 @@ function AppIndex() {
   }, [teams]);
 
   useEffect(() => {
-    getSuperhero();
+    formTeams();
   }, []);
 
   return (
@@ -193,7 +174,6 @@ function AppIndex() {
           setMailBody={setMailBody}
           mailBody={mailBody}
           clearBattle={clearBattle}
-          getEmojiString={getEmojiString}
         />
       )}
     </div>

@@ -3,6 +3,7 @@ import Battle from './components/Battle/BattleIndex';
 import HeroTeam from './components/HeroTeam/HeroTeam';
 import Mail from './components/Mail/MailIndex';
 import PropTypes from 'prop-types';
+import { getEmojiString } from './utils';
 
 function App({
   teams,
@@ -17,7 +18,6 @@ function App({
   setMailBody,
   mailBody,
   clearBattle,
-  getEmojiString,
 }) {
   return (
     <div>

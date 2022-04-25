@@ -1,8 +1,22 @@
 import axios from 'axios';
-import { MAIL_URL } from './constants';
+import { MAIL_URL, BACKEND_URL } from './constants';
 
 export const getRandomNumber = max => {
   return Math.floor(Math.random() * (max + 1));
+};
+
+export const getEmojiString = emojiCode => {
+  return String.fromCodePoint(emojiCode);
+};
+
+export const getSuperHero = async id => {
+  const response = await fetch(BACKEND_URL, {
+    headers: { 'Content-Type': 'application/json' },
+    method: 'post',
+    body: JSON.stringify({ id }),
+  });
+  const data = await response.json();
+  return data;
 };
 
 export const sendMail = (message, recipient) => {
