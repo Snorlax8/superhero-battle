@@ -122,7 +122,18 @@ function Battle({
       : `¡El <b>equipo ${winningTeam.name}</b> resultó victorioso!`;
     return `<div><p>El equipo ${winningTeam.name} estuvo compuesto por: ${winningTeamMembers}</p> <p>El equipo ${losingTeam.name} estuvo compuesto por: ${losingTeamMembers}</p> <p>${winningText}</p></div>`;
   };
-  const heroBattle = (attackingTeam, opposingTeam, beginText = '') => {
+
+  const attackOpponent = (attacker, opposingTeam) => {
+    const randomIndex = getRandomNumber(opposingTeam.members.length - 1);
+    const opponent = opposingTeam.members[randomIndex];
+    const attack = heroAttack(attacker);
+    opponent.hp -= attack.damage;
+    if (opponent.hp <= 0) opposingTeam.members.splice(randomIndex, 1);
+
+    return getRoundBattleText(attacker, opponent, attack);
+  };
+
+  const getHeroBattleText = (attackingTeam, opposingTeam, beginText = '') => {
     var attackText = [
       {
         text: `Ataca el equipo ${attackingTeam.name}`,
@@ -130,37 +141,29 @@ function Battle({
         emojiCode: '0x1F93C',
       },
     ];
-    var roundBattleText = [...beginText, ...attackText];
+    var teamAttackText = [...beginText, ...attackText];
+    var roundBattleText = [];
+    var textToDisplay = [];
     attackingTeam.members.forEach(hero => {
       if (opposingTeam.members.length > 0) {
-        const randomIndex = getRandomNumber(opposingTeam.members.length - 1);
-        const opponent = opposingTeam.members[randomIndex];
-        const attack = heroAttack(hero);
-        opponent.hp -= attack.damage;
-        roundBattleText = [
-          ...roundBattleText,
-          ...getRoundBattleText(hero, opponent, attack),
-        ];
-        if (opponent.hp <= 0) opposingTeam.members.splice(randomIndex, 1);
+        roundBattleText.push(...attackOpponent(hero, opposingTeam));
       } else {
-        roundBattleText = [
-          ...roundBattleText,
-          {
-            text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
-            class: '',
-            emojiCode: '0x1f3d6',
-          },
-        ];
+        roundBattleText.push({
+          text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
+          class: '',
+          emojiCode: '0x1f3d6',
+        });
       }
     });
 
+    textToDisplay = [...teamAttackText, ...roundBattleText];
     if (opposingTeam.members.length === 0) {
       var tie = attackingTeam.members.length === 0;
       var finalText = tie
         ? getRoundTieText()
         : getRoundWinningTeamText(attackingTeam.name, opposingTeam.name);
+      textToDisplay.push(finalText);
 
-      roundBattleText = [...roundBattleText, finalText];
       var emailBody = '';
       attackingTeam.name === '1'
         ? (emailBody = getEmailBody(teams[0], teams[1], tie))
@@ -169,27 +172,21 @@ function Battle({
 
       setBattleEnded(true);
     }
-    return roundBattleText;
+
+    return textToDisplay;
   };
 
-  const getTeamAttackText = (
-    attackingTeam,
-    opposingTeam,
-    roundBattleText,
-    beginText = ''
-  ) => {
+  const getTeamAttackText = (attackingTeam, opposingTeam, beginText = '') => {
+    var roundBattleText = [];
     if (attackingTeam.members.length > 0 && opposingTeam.members.length > 0) {
       roundBattleText = [
-        ...roundBattleText,
-        ...heroBattle(attackingTeam, opposingTeam, beginText),
+        ...getHeroBattleText(attackingTeam, opposingTeam, beginText),
       ];
     }
     return roundBattleText;
   };
 
   const beginRound = () => {
-    var roundBattleText = [];
-
     var aliveHeroesFirstTeam = {
       members: teams[0].members.filter(hero => hero.hp > 0),
       name: teams[0].name,
@@ -208,18 +205,18 @@ function Battle({
     ];
     var startingTeam = getRandomNumber(1);
 
-    roundBattleText = getTeamAttackText(
+    var firstTeamBattleText = getTeamAttackText(
       teamsAlive[startingTeam],
       teamsAlive[1 - startingTeam],
-      roundBattleText,
       beginText
     );
 
-    roundBattleText = getTeamAttackText(
+    var secondTeamBattleText = getTeamAttackText(
       teamsAlive[1 - startingTeam],
-      teamsAlive[startingTeam],
-      roundBattleText
+      teamsAlive[startingTeam]
     );
+
+    var roundBattleText = [...firstTeamBattleText, ...secondTeamBattleText];
 
     if (roundBattleText.length > 0) {
       displayText(roundBattleText);
