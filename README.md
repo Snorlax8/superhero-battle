@@ -59,6 +59,8 @@ Once a battle is over (i.e., a team has won), you will be presented three differ
 
 - A hero whose alignment is 'neutral' is considered to be 'good'.
 
+- Any 'null' stat of a hero is replaced by a random number between 0 and 100.
+
 - To form the teams, a set of 10 unique numbers is generated. These numbers correspond to the IDs of the heroes that will be fetched from the [Superhero API](https://superheroapi.com/). The heroes fetched are stored in an array which is divided in half to form both teams, which will be referred as "first team" and "second team" from now on.
 
 - In a fight round, the battle between the teams is not simultaneous. When a fight round begins, a random number (either 0 or 1) is generated to determine which team gets to attack first. If the random number equals 0, the first team attacks first. Otherwise, the second team attacks first. After the first attack of the round is over, the attacked heroes' health points (HP) are updated accordingly. Only the heroes that are still standing (HP > 0) will be able to participate in the second attack of the round. 
