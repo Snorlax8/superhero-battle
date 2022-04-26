@@ -31,7 +31,13 @@ Then, your `.env` file will look something like this:
 
 ## Running the project
 
-After you have created the `.env` file and the project's backend is running, you can run the frontend with the following command:
+After you have created the `.env` file, the first step is running the following command:
+
+```
+npm install
+```
+
+Then, you can run the project by doing:
 ```
 npm run start
 ```
