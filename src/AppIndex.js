@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { getRandomNumber, getSuperHero } from './utils';
+import { maxHeroId, teamsSize } from './constants';
 import App from './AppLayout';
 
 function AppIndex() {
@@ -14,8 +15,8 @@ function AppIndex() {
 
   const getHeroIds = () => {
     const heroIds = new Set();
-    while (heroIds.size !== 10) {
-      heroIds.add(getRandomNumber(731));
+    while (heroIds.size !== teamsSize) {
+      heroIds.add(getRandomNumber(maxHeroId));
     }
 
     return heroIds;
@@ -129,10 +130,10 @@ function AppIndex() {
           heroes.push(processHeroData(data));
         }),
       );
-      const firstTeam = heroes.slice(0, 5);
+      const firstTeam = heroes.slice(0, teamsSize / 2);
       const processedFirstTeam = processTeam(firstTeam, '1');
 
-      const secondTeam = heroes.slice(5, 10);
+      const secondTeam = heroes.slice(teamsSize / 2, teamsSize);
       const processedSecondTeam = processTeam(secondTeam, '2');
 
       setTeams([processedFirstTeam, processedSecondTeam]);

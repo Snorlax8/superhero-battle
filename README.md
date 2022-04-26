@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# Superhero Battle - Frontend
+This is the repository for the "Superhero Battle" frontend. The instructions on how to run this project and the description of its features can be found in the following sections.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Project setup and running
 
-## Available Scripts
+## Preconditions
 
-In the project directory, you can run:
+To run both this project and its backend, you need to have Node installed (version 13 and above recommended).
+### Running the backend
+As mentioned before, this repository consists of the frontend for the "Superhero Battle" application. Therefore, a precondition to be able to run this project is having its backend running, [whose repository can be found here](https://github.com/Snorlax8/superhero-battle-backend).
 
-### `npm start`
+By default, the backend runs in the port 8000. If, by any reason, you decide to change this port, you will have to change the `BACKEND_URL` variable accordingly, which is found in the `superhero-battle/src/constants.js` file.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Environment variables
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+To be able to send mails, this project uses [Mailgun](https://www.mailgun.com/). If you want to send an email, you will have to create a free account in Mailgun and setup a domain. It is important to notice that you can only send mails to authorized recipients in your domain.
 
-### `npm test`
+Then, you need to create an environment file called `.env` and place it in the root folder (`superhero-battle`) of the project. Therefore, the path to the environment file should look like this: `superhero-battle/.env`.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![folder-structure-example](./readme_assets/folder-structure-example.png)
 
-### `npm run build`
+There are two environment variables that need to go in the `.env` file:
+- `REACT_APP_MAIL_DOMAIN`
+- `REACT_APP_MAIL_API_KEY`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The `REACT_APP_MAIL_DOMAIN` needs to be assigned to the domain you set up at Mailgun, and its corresponding API key needs to be assigned to the `REACT_APP_MAIL_API_KEY`. 
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Then, your `.env` file will look something like this:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![env-file-example](./readme_assets/env_file_example.png)
 
-### `npm run eject`
+## Running the project
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+After you have created the `.env` file and the project's backend is running, you can run the frontend with the following command:
+```
+npm run start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The project will be running in the port 3000.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Project features
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The "Superhero Battle" application allows you to see a battle unfold between two teams of heroes. A battle consists of at least one fight round. Once the teams are formed, you will have the option to start a fight round, and you will be able to keep doing this until a team is declared as the winner, ending the battle.
 
-## Learn More
+Once a battle is over (i.e., a team has won), you will be presented three different options:
+- **Send mail**: input an email of your choice (remember that it needs to be an authorized recipient of your Mailgun domain) and receive a summary of the battle. This summary includes the name of the heroes that fought for each team and the team that was declared a winner.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Start another battle with the same heroes**: all the heroes will be healed and you'll regain the option to start a fight round.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Start another battle with different heroes**: new teams will be formed and you'll be able to start a fight round.
 
-### Code Splitting
+## Considerations taken
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- A hero whose alignment is 'neutral' is considered to be 'good'.
 
-### Analyzing the Bundle Size
+- To form the teams, a set of 10 unique numbers is generated. These numbers correspond to the IDs of the heroes that will be fetched from the [Superhero API](https://superheroapi.com/). The heroes fetched are stored in an array which is divided in half to form both teams, which will be referred as "first team" and "second team" from now on.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- In a fight round, the battle between the teams is not simultaneous. When a fight round begins, a random number (either 0 or 1) is generated to determine which team gets to attack first. If the random number equals 0, the first team attacks first. Otherwise, the second team attacks first. After the first attack of the round is over, the attacked heroes' health points (HP) are updated accordingly. Only the heroes that are still standing (HP > 0) will be able to participate in the second attack of the round. 
