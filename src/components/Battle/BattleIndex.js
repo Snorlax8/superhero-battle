@@ -54,7 +54,7 @@ function Battle({
   };
 
   const BattleText = (text, cssClass, emojiCode) => {
-    return { text, class: cssClass, emojiCode };
+    return { text, class: `text battle-text ${cssClass}`, emojiCode };
   };
 
   const attackTextToDisplay = (attacker, opponent, attack) => {
@@ -82,11 +82,11 @@ function Battle({
   };
 
   const getRoundWinningTeamText = (winningTeam, losingTeam) => {
-    return {
-      text: `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
-      class: '',
-      emojiCode: emojiCodes.trophy,
-    };
+    return BattleText(
+      `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
+      'bold',
+      emojiCodes.trophy
+    );
   };
 
   const getRoundTieText = () => {
@@ -144,11 +144,11 @@ function Battle({
   };
 
   const getHeroRestText = hero => {
-    return {
-      text: `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
-      class: '',
-      emojiCode: emojiCodes.beach,
-    };
+    return BattleText(
+      `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
+      '',
+      emojiCodes.beach
+    );
   };
 
   const getHeroAttackText = (hero, opposingTeam) => {
@@ -175,11 +175,11 @@ function Battle({
 
   const getTeamAttackText = (attackingTeam, opposingTeam, beginText = '') => {
     var attackText = [
-      {
-        text: `Ataca el equipo ${attackingTeam.name}`,
-        class: '',
-        emojiCode: emojiCodes.wrestling,
-      },
+      BattleText(
+        `Ataca el equipo ${attackingTeam.name}`,
+        '',
+        emojiCodes.wrestling
+      ),
     ];
     var teamAttackText = [...beginText, ...attackText];
     var roundAttackText = [];
@@ -217,11 +217,7 @@ function Battle({
     };
     var teamsAlive = [aliveHeroesFirstTeam, aliveHeroesSecondTeam];
     var beginText = [
-      {
-        text: `¡Empieza la ronda ${round}!`,
-        class: '',
-        emojiCode: emojiCodes.megaphone,
-      },
+      BattleText(`¡Empieza la ronda ${round}!`, 'bold', emojiCodes.megaphone),
     ];
     var startingTeam = getRandomNumber(1);
 

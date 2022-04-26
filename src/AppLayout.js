@@ -23,9 +23,9 @@ function App({
     <div>
       <div className="App">
         <HeroTeam heroes={teams[0].members} top={true} />
-        <div className="team-name">Equipo 1</div>
-        <div className="begin-battle-container">
-          <div>
+        <div className="text team-name">Equipo 1</div>
+        <div>
+          <div className="begin-battle-container">
             {!battleEnded && (
               <Battle
                 setBattleEnded={setBattleEnded}
@@ -39,30 +39,35 @@ function App({
                 setMailBody={setMailBody}
               />
             )}
-            <div className="begin-battle"></div>
-            <div>
-              {battleEnded && (
-                <div>
-                  La batalla terminó. Puedes ingresar tu mail para recibir un
-                  resumen o comenzar otra batalla.
-                  <Mail mailBody={mailBody} />
-                  <button onClick={() => clearBattle()}>
-                    Comenzar otra batalla
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
+
+          {battleEnded && (
+            <div className="battle-over-container">
+              <div className="text battle-over">¡Batalla finalizada!</div>
+              <div className="text">
+                Puedes ingresar tu mail para recibir un resumen o comenzar otra
+                batalla.
+              </div>
+              <div className="text header"> Enviar resumen </div>
+              <Mail mailBody={mailBody} />
+              <div className="text header"> ¿Otra batalla? </div>
+              <button className="text" onClick={() => clearBattle()}>
+                Comenzar otra batalla
+              </button>
+            </div>
+          )}
         </div>
         <div className="divider">
-          {battleText.map((textObject, index) => (
-            <div key={index}>
-              <span>{getEmojiString(textObject.emojiCode)} </span>
-              {textObject.text}
-            </div>
-          ))}
+          <div className="battle-text-container">
+            {battleText.map((textObject, index) => (
+              <div className={textObject.class} key={index}>
+                <span>{getEmojiString(textObject.emojiCode)} </span>
+                {textObject.text}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="team-name">Equipo 2</div>
+        <div className="text team-name">Equipo 2</div>
         <HeroTeam heroes={teams[1].members} top={false} />
       </div>
     </div>
