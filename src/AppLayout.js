@@ -1,8 +1,8 @@
 import './App.css';
+import PropTypes from 'prop-types';
 import Battle from './components/Battle/BattleIndex';
 import HeroTeam from './components/HeroTeam/HeroTeam';
 import Mail from './components/Mail/MailIndex';
-import PropTypes from 'prop-types';
 import { getEmojiString } from './utils';
 
 function App({
@@ -22,7 +22,7 @@ function App({
   return (
     <div>
       <div className="App">
-        <HeroTeam heroes={teams[0].members} top={true} />
+        <HeroTeam heroes={teams[0].members} top />
         <div className="text team-name">Equipo 1</div>
         <div>
           <div className="begin-battle-container">
@@ -52,10 +52,10 @@ function App({
               <Mail mailBody={mailBody} />
               <div className="text header"> ¿Otra batalla? </div>
               <div className="new-battle-buttons">
-                <button className="text" onClick={() => clearBattle(false)}>
+                <button type="button" className="text" onClick={() => clearBattle(false)}>
                   Comenzar otra batalla con los mismos héroes
                 </button>
-                <button className="text" onClick={() => clearBattle(true)}>
+                <button type="button" className="text" onClick={() => clearBattle(true)}>
                   Comenzar otra batalla con héroes diferentes
                 </button>
               </div>
@@ -66,7 +66,10 @@ function App({
           <div className="battle-text-container">
             {battleText.map((textObject, index) => (
               <div className={textObject.class} key={index}>
-                <span>{getEmojiString(textObject.emojiCode)} </span>
+                <span>
+                  {getEmojiString(textObject.emojiCode)}
+                  {' '}
+                </span>
                 {textObject.text}
               </div>
             ))}
@@ -80,19 +83,18 @@ function App({
 }
 
 App.propTypes = {
-  teams: PropTypes.array,
-  setTeams: PropTypes.func,
-  battleEnded: PropTypes.bool,
-  setBattleEnded: PropTypes.func,
-  battleText: PropTypes.array,
-  setBattleText: PropTypes.func,
-  round: PropTypes.number,
-  setRound: PropTypes.func,
-  clearingBattle: PropTypes.bool,
-  setMailBody: PropTypes.func,
-  mailBody: PropTypes.string,
-  clearBattle: PropTypes.func,
-  getEmojiString: PropTypes.func,
+  teams: PropTypes.instanceOf(Array).isRequired,
+  setTeams: PropTypes.func.isRequired,
+  battleEnded: PropTypes.bool.isRequired,
+  setBattleEnded: PropTypes.func.isRequired,
+  battleText: PropTypes.instanceOf(Array).isRequired,
+  setBattleText: PropTypes.func.isRequired,
+  round: PropTypes.number.isRequired,
+  setRound: PropTypes.func.isRequired,
+  clearingBattle: PropTypes.bool.isRequired,
+  setMailBody: PropTypes.func.isRequired,
+  mailBody: PropTypes.string.isRequired,
+  clearBattle: PropTypes.func.isRequired,
 };
 
 export default App;

@@ -13,7 +13,7 @@ function AppIndex() {
   const [mailBody, setMailBody] = useState('');
 
   const getHeroIds = () => {
-    var heroIds = new Set();
+    const heroIds = new Set();
     while (heroIds.size !== 10) {
       heroIds.add(getRandomNumber(731));
     }
@@ -21,17 +21,14 @@ function AppIndex() {
     return heroIds;
   };
 
-  const processHeroStat = stat => {
+  const processHeroStat = (stat) => {
     if (stat && stat !== 'null') {
       return parseInt(stat, 10);
-    } else {
-      return getRandomNumber(100);
     }
+    return getRandomNumber(100);
   };
 
-  const getActualStamina = () => {
-    return getRandomNumber(10);
-  };
+  const getActualStamina = () => getRandomNumber(10);
 
   const getFiliationCoefficient = (heroAlignment, teamAlignment) => {
     const modifier = 1 + getRandomNumber(9);
@@ -43,14 +40,14 @@ function AppIndex() {
   const getActualStat = (
     baseStat,
     heroActualStamina,
-    heroFiliationCoefficient
+    heroFiliationCoefficient,
   ) => {
     const modifiedBaseStat = 2 * baseStat + heroActualStamina;
     return Math.floor((heroFiliationCoefficient * modifiedBaseStat) / 1.1);
   };
 
-  const processHeroData = data => {
-    var heroStats = {
+  const processHeroData = (data) => {
+    const heroStats = {
       intelligence: processHeroStat(data.powerstats.intelligence),
       strength: processHeroStat(data.powerstats.strength),
       speed: processHeroStat(data.powerstats.speed),
@@ -68,27 +65,31 @@ function AppIndex() {
     };
   };
 
-  const getHeroHP = hero => {
+  const getHeroHP = (hero) => {
     const actualStaminaModifier = 1 + hero.actualStamina / 10;
-    const statsCombination =
-      (hero.powerstats.strength * 0.8 +
-        hero.powerstats.durability * 0.7 +
-        hero.powerstats.power) /
-      2;
+    const statsCombination = (hero.powerstats.strength * 0.8
+        + hero.powerstats.durability * 0.7
+        + hero.powerstats.power)
+      / 2;
     return Math.round(statsCombination * actualStaminaModifier + 100);
   };
 
   const setActualStats = (member, teamAlignment) => {
-    var newMember = { ...member, hp: 0, fb: 0, powerstats: [] };
+    const newMember = {
+      ...member,
+      hp: 0,
+      fb: 0,
+      powerstats: [],
+    };
     const filliationCoefficient = getFiliationCoefficient(
       newMember.alignment,
-      teamAlignment
+      teamAlignment,
     );
-    Object.keys(member.powerstats).forEach(stat => {
+    Object.keys(member.powerstats).forEach((stat) => {
       newMember.powerstats[stat] = getActualStat(
         member.powerstats[stat],
         member.actualStamina,
-        filliationCoefficient
+        filliationCoefficient,
       );
     });
     newMember.hp = getHeroHP(newMember);
@@ -97,11 +98,22 @@ function AppIndex() {
 
     return newMember;
   };
-
+  const getTeamAlignment = (team) => {
+    let goodCount = 0;
+    let badCount = 0;
+    team.forEach((member) => {
+      if (member.alignment === 'bad') {
+        badCount += 1;
+      } else {
+        goodCount += 1;
+      }
+    });
+    return goodCount >= badCount ? 'good' : 'bad';
+  };
   const processTeam = (team, name) => {
     const teamAlignment = getTeamAlignment(team);
-    var newMembers = [];
-    team.forEach(member => {
+    const newMembers = [];
+    team.forEach((member) => {
       newMembers.push(setActualStats(member, teamAlignment));
     });
     return { members: newMembers, name };
@@ -112,10 +124,10 @@ function AppIndex() {
       const heroIds = [...getHeroIds()];
       const heroes = [];
       await Promise.all(
-        heroIds.map(async id => {
+        heroIds.map(async (id) => {
           const data = await getSuperHero(id);
           heroes.push(processHeroData(data));
-        })
+        }),
       );
       const firstTeam = heroes.slice(0, 5);
       const processedFirstTeam = processTeam(firstTeam, '1');
@@ -125,34 +137,27 @@ function AppIndex() {
 
       setTeams([processedFirstTeam, processedSecondTeam]);
     } catch (e) {
-      console.error(e);
+      setBattleText(e);
     }
   };
 
-  const getTeamAlignment = team => {
-    var goodCount = 0;
-    var badCount = 0;
-    team.forEach(member => {
-      if (member.alignment === 'bad') {
-        badCount += 1;
-      } else {
-        goodCount += 1;
-      }
+  const healHeroes = (heroes) => {
+    const healedHeroes = [];
+    heroes.forEach((hero) => {
+      healedHeroes.push({ ...hero, hp: hero.originalHp });
     });
-    return goodCount >= badCount ? 'good' : 'bad';
-  };
-
-  const healHeroes = heroes => {
-    heroes.forEach(hero => (hero.hp = hero.originalHp));
+    return healedHeroes;
   };
 
   const healTeams = () => {
-    teams.forEach(team => {
-      healHeroes(team.members);
+    const healedTeams = [];
+    teams.forEach((team) => {
+      healedTeams.push({ ...team, members: healHeroes(team.members) });
     });
+    setTeams(healedTeams);
   };
 
-  const clearBattle = newTeams => {
+  const clearBattle = (newTeams) => {
     setBattleEnded(false);
     if (newTeams) {
       setClearingBattle(true);

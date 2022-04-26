@@ -3,8 +3,9 @@ import './HeroCard.css';
 import DefaultImage from '../../assets/images/major_glory.png';
 import HeroInfo from '../HeroInfo/HeroInfo';
 
-const HeroCard = ({ hero, top }) => {
-  const addDefaultImage = event => {
+function HeroCard({ hero, top }) {
+  const addDefaultImage = (event) => {
+    // eslint-disable-next-line no-param-reassign
     event.target.src = DefaultImage;
   };
 
@@ -12,18 +13,19 @@ const HeroCard = ({ hero, top }) => {
     <div>
       {top && <HeroInfo hero={hero} />}
       <img
+        alt="hero-avatar"
         className={`avatar ${hero.hp > 0 ? '' : 'avatar-dead'}`}
         src={hero.image.url}
         onError={addDefaultImage}
-      ></img>
+      />
       {!top && <HeroInfo hero={hero} />}
     </div>
   );
-};
+}
 
 HeroCard.propTypes = {
-  hero: PropTypes.object,
-  top: PropTypes.bool,
+  hero: PropTypes.instanceOf(Object).isRequired,
+  top: PropTypes.bool.isRequired,
 };
 
 export default HeroCard;

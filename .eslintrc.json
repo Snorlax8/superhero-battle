@@ -4,7 +4,7 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "airbnb"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -14,6 +14,8 @@
   },
   "plugins": ["react"],
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/no-array-index-key": "off"
   }
 }

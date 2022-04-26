@@ -4,7 +4,7 @@ import { sendMail } from '../../utils';
 
 import MailLayout from './MailLayout';
 
-const Mail = ({ mailBody }) => {
+function Mail({ mailBody }) {
   const [mail, setMail] = useState('');
 
   return (
@@ -15,13 +15,10 @@ const Mail = ({ mailBody }) => {
       mailBody={mailBody}
     />
   );
-};
+}
 
 Mail.propTypes = {
-  mail: PropTypes.string,
-  setMail: PropTypes.func,
-  sendMail: PropTypes.func,
-  mailBody: PropTypes.string,
+  mailBody: PropTypes.string.isRequired,
 };
 
 export default Mail;

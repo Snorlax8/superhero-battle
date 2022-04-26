@@ -1,15 +1,11 @@
 import axios from 'axios';
 import { MAIL_URL, BACKEND_URL } from './constants';
 
-export const getRandomNumber = max => {
-  return Math.floor(Math.random() * (max + 1));
-};
+export const getRandomNumber = (max) => Math.floor(Math.random() * (max + 1));
 
-export const getEmojiString = emojiCode => {
-  return String.fromCodePoint(emojiCode);
-};
+export const getEmojiString = (emojiCode) => String.fromCodePoint(emojiCode);
 
-export const getSuperHero = async id => {
+export const getSuperHero = async (id) => {
   const response = await fetch(BACKEND_URL, {
     headers: { 'Content-Type': 'application/json' },
     method: 'post',

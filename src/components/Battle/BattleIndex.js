@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import Proptypes from 'prop-types';
+import PropTypes from 'prop-types';
 import './Battle.css';
 import { getRandomNumber } from '../../utils';
 import BattleLayout from './BattleLayout';
@@ -15,89 +15,90 @@ function Battle({
   clearingBattle,
   setMailBody,
 }) {
-  const getMentalAttackDmg = hero => {
-    const statsCombination =
-      hero.powerstats.intelligence * 0.7 +
-      hero.powerstats.speed * 0.2 +
-      hero.powerstats.combat * 0.1;
+  const getMentalAttackDmg = (hero) => {
+    const statsCombination = hero.powerstats.intelligence * 0.7
+      + hero.powerstats.speed * 0.2
+      + hero.powerstats.combat * 0.1;
     return Math.floor(statsCombination * hero.fb);
   };
 
-  const getStrongAttackDmg = hero => {
-    const statsCombination =
-      hero.powerstats.intelligence * 0.7 +
-      hero.powerstats.speed * 0.2 +
-      hero.powerstats.combat * 0.1;
+  const getStrongAttackDmg = (hero) => {
+    const statsCombination = hero.powerstats.intelligence * 0.7
+      + hero.powerstats.speed * 0.2
+      + hero.powerstats.combat * 0.1;
     return Math.floor(statsCombination * hero.fb);
   };
 
-  const getFastAttackDmg = hero => {
-    const statsCombination =
-      hero.powerstats.speed * 0.55 +
-      hero.powerstats.durability * 0.25 +
-      hero.powerstats.strength * 0.2;
+  const getFastAttackDmg = (hero) => {
+    const statsCombination = hero.powerstats.speed * 0.55
+      + hero.powerstats.durability * 0.25
+      + hero.powerstats.strength * 0.2;
     return Math.floor(statsCombination * hero.fb);
   };
 
-  const heroAttack = hero => {
+  const heroAttack = (hero) => {
     const type = getRandomNumber(3);
     switch (type) {
       case 1:
-        return { type: AttackTypes.Mental, damage: getMentalAttackDmg(hero) };
+        return {
+          type: AttackTypes.Mental,
+          damage: getMentalAttackDmg(hero),
+          emojiCode: emojiCodes.brain,
+        };
       case 2:
-        return { type: AttackTypes.Strong, damage: getStrongAttackDmg(hero) };
+        return {
+          type: AttackTypes.Strong,
+          damage: getStrongAttackDmg(hero),
+          emojiCode: emojiCodes.bicep,
+        };
       case 3:
-        return { type: AttackTypes.Fast, damage: getFastAttackDmg(hero) };
+        return {
+          type: AttackTypes.Fast,
+          damage: getFastAttackDmg(hero),
+          emojiCode: emojiCodes.fastForward,
+        };
       default:
-        return { type: AttackTypes.Mental, damage: getStrongAttackDmg(hero) };
+        return {
+          type: AttackTypes.Mental,
+          damage: getStrongAttackDmg(hero),
+          emojiCode: emojiCodes.brain,
+        };
     }
   };
 
-  const BattleText = (text, cssClass, emojiCode) => {
-    return { text, class: `text battle-text ${cssClass}`, emojiCode };
-  };
+  const BattleText = (text, cssClass, emojiCode) => ({ text, class: `text battle-text ${cssClass}`, emojiCode });
 
-  const attackTextToDisplay = (attacker, opponent, attack) => {
-    return [
-      BattleText(
-        `¡${attacker.name} ataca a ${opponent.name}!`,
-        '',
-        emojiCodes.collision
-      ),
-      BattleText(
-        `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
-        '',
-        attack.type === 'Strong'
-          ? emojiCodes.bicep
-          : attack.type === 'Fast'
-          ? emojiCodes.fastForward
-          : emojiCodes.brain
-      ),
-      BattleText(
-        `${opponent.name} queda con ${opponent.hp} de HP.`,
-        '',
-        opponent.hp > 0 ? emojiCodes.hero : emojiCodes.tombStone
-      ),
-    ];
-  };
+  const attackTextToDisplay = (attacker, opponent, attack) => [
+    BattleText(
+      `¡${attacker.name} ataca a ${opponent.name}!`,
+      '',
+      emojiCodes.collision,
+    ),
+    BattleText(
+      `${attacker.name} realiza un ataque de tipo ${attack.type} que genera ${attack.damage} de daño.`,
+      '',
+      attack.emojiCode,
+    ),
+    BattleText(
+      `${opponent.name} queda con ${opponent.hp} de HP.`,
+      '',
+      opponent.hp > 0 ? emojiCodes.hero : emojiCodes.tombStone,
+    ),
+  ];
 
-  const getRoundWinningTeamText = (winningTeam, losingTeam) => {
-    return BattleText(
-      `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
-      'bold',
-      emojiCodes.trophy
-    );
-  };
+  const getRoundWinningTeamText = (winningTeam, losingTeam) => BattleText(
+    `No quedan integrantes del equipo ${losingTeam}. ¡El equipo ${winningTeam} es el vencedor!`,
+    'bold',
+    emojiCodes.trophy,
+  );
 
-  const getRoundTieText = () => {
-    return {
-      text: `¡Es un empate! Ningún equipo ha salido victorioso.`,
-      class: '',
-      emojiCode: emojiCodes.noEntry,
-    };
-  };
+  const getRoundTieText = () => ({
+    text: '¡Es un empate! Ningún equipo ha salido victorioso.',
+    class: '',
+    emojiCode: emojiCodes.noEntry,
+  });
 
-  const displayText = textArray => {
+  const displayText = (textArray) => {
     setBattleText([...battleText, ...textArray]);
   };
 
@@ -105,8 +106,8 @@ function Battle({
     setRound(round + 1);
   };
 
-  const getTeamMembersString = team => {
-    var teamMembers = '';
+  const getTeamMembersString = (team) => {
+    let teamMembers = '';
     team.members.forEach((member, index) => {
       if (index !== team.members.length - 1) {
         teamMembers = teamMembers.concat(`${member.name}, `);
@@ -116,10 +117,10 @@ function Battle({
   };
 
   const getEmailBody = (winningTeam, losingTeam, tie) => {
-    var winningTeamMembers = getTeamMembersString(winningTeam);
-    var losingTeamMembers = getTeamMembersString(losingTeam);
+    const winningTeamMembers = getTeamMembersString(winningTeam);
+    const losingTeamMembers = getTeamMembersString(losingTeam);
 
-    var winningText = tie
+    const winningText = tie
       ? '¡El resultado fue un empate! No hubo equipo ganador.'
       : `¡El <b>equipo ${winningTeam.name}</b> resultó victorioso!`;
     return `<div><p>El equipo ${winningTeam.name} estuvo compuesto por: ${winningTeamMembers}</p> <p>El equipo ${losingTeam.name} estuvo compuesto por: ${losingTeamMembers}</p> <p>${winningText}</p></div>`;
@@ -136,23 +137,20 @@ function Battle({
   };
 
   const createMailBody = (attackingTeam, tie) => {
-    var emailBody = '';
-    attackingTeam.name === '1'
-      ? (emailBody = getEmailBody(teams[0], teams[1], tie))
-      : (emailBody = getEmailBody(teams[1], teams[0], tie));
+    let emailBody = '';
+    if (attackingTeam.name === '1') emailBody = getEmailBody(teams[0], teams[1], tie);
+    else emailBody = getEmailBody(teams[1], teams[0], tie);
     setMailBody(emailBody);
   };
 
-  const getHeroRestText = hero => {
-    return BattleText(
-      `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
-      '',
-      emojiCodes.beach
-    );
-  };
+  const getHeroRestText = (hero) => BattleText(
+    `${hero.name} no tiene a quien atacar, así que se toma un descanso.`,
+    '',
+    emojiCodes.beach,
+  );
 
   const getHeroAttackText = (hero, opposingTeam) => {
-    var heroAttackText = [];
+    const heroAttackText = [];
     if (opposingTeam.members.length > 0) {
       heroAttackText.push(...attackOpponent(hero, opposingTeam));
     } else {
@@ -162,8 +160,8 @@ function Battle({
   };
 
   const handleBattleEnd = (attackingTeam, opposingTeam, textToDisplay) => {
-    var tie = attackingTeam.members.length === 0;
-    var finalText = tie
+    const tie = attackingTeam.members.length === 0;
+    const finalText = tie
       ? getRoundTieText()
       : getRoundWinningTeamText(attackingTeam.name, opposingTeam.name);
     textToDisplay.push(finalText);
@@ -174,17 +172,17 @@ function Battle({
   };
 
   const getTeamAttackText = (attackingTeam, opposingTeam, beginText = '') => {
-    var attackText = [
+    const attackText = [
       BattleText(
         `Ataca el equipo ${attackingTeam.name}`,
         '',
-        emojiCodes.wrestling
+        emojiCodes.wrestling,
       ),
     ];
-    var teamAttackText = [...beginText, ...attackText];
-    var roundAttackText = [];
-    var textToDisplay = [];
-    attackingTeam.members.forEach(hero => {
+    const teamAttackText = [...beginText, ...attackText];
+    const roundAttackText = [];
+    let textToDisplay = [];
+    attackingTeam.members.forEach((hero) => {
       roundAttackText.push(...getHeroAttackText(hero, opposingTeam));
     });
 
@@ -197,7 +195,7 @@ function Battle({
   };
 
   const getTeamRoundText = (attackingTeam, opposingTeam, beginText = '') => {
-    var roundAttackText = [];
+    let roundAttackText = [];
     if (attackingTeam.members.length > 0 && opposingTeam.members.length > 0) {
       roundAttackText = [
         ...getTeamAttackText(attackingTeam, opposingTeam, beginText),
@@ -207,32 +205,32 @@ function Battle({
   };
 
   const beginRound = () => {
-    var aliveHeroesFirstTeam = {
-      members: teams[0].members.filter(hero => hero.hp > 0),
+    const aliveHeroesFirstTeam = {
+      members: teams[0].members.filter((hero) => hero.hp > 0),
       name: teams[0].name,
     };
-    var aliveHeroesSecondTeam = {
-      members: teams[1].members.filter(hero => hero.hp > 0),
+    const aliveHeroesSecondTeam = {
+      members: teams[1].members.filter((hero) => hero.hp > 0),
       name: teams[1].name,
     };
-    var teamsAlive = [aliveHeroesFirstTeam, aliveHeroesSecondTeam];
-    var beginText = [
+    const teamsAlive = [aliveHeroesFirstTeam, aliveHeroesSecondTeam];
+    const beginText = [
       BattleText(`¡Empieza la ronda ${round}!`, 'bold', emojiCodes.megaphone),
     ];
-    var startingTeam = getRandomNumber(1);
+    const startingTeam = getRandomNumber(1);
 
-    var firstTeamBattleText = getTeamRoundText(
+    const firstTeamBattleText = getTeamRoundText(
       teamsAlive[startingTeam],
       teamsAlive[1 - startingTeam],
-      beginText
+      beginText,
     );
 
-    var secondTeamBattleText = getTeamRoundText(
+    const secondTeamBattleText = getTeamRoundText(
       teamsAlive[1 - startingTeam],
-      teamsAlive[startingTeam]
+      teamsAlive[startingTeam],
     );
 
-    var roundAttackText = [...firstTeamBattleText, ...secondTeamBattleText];
+    const roundAttackText = [...firstTeamBattleText, ...secondTeamBattleText];
 
     if (roundAttackText.length > 0) {
       displayText(roundAttackText);
@@ -250,16 +248,14 @@ function Battle({
 }
 
 Battle.propTypes = {
-  battleEnded: Proptypes.bool,
-  setBattleEnded: Proptypes.func,
-  battleText: Proptypes.array,
-  setBattleText: Proptypes.func,
-  round: Proptypes.number,
-  setRound: Proptypes.func,
-  teams: Proptypes.array,
-  setTeams: Proptypes.func,
-  clearingBattle: Proptypes.bool,
-  setMailBody: Proptypes.func,
+  setBattleEnded: PropTypes.func.isRequired,
+  battleText: PropTypes.instanceOf(Array).isRequired,
+  setBattleText: PropTypes.func.isRequired,
+  round: PropTypes.number.isRequired,
+  setRound: PropTypes.func.isRequired,
+  teams: PropTypes.instanceOf(Array).isRequired,
+  clearingBattle: PropTypes.bool.isRequired,
+  setMailBody: PropTypes.func.isRequired,
 };
 
 export default Battle;
