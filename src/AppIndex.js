@@ -92,6 +92,7 @@ function AppIndex() {
       );
     });
     newMember.hp = getHeroHP(newMember);
+    newMember.originalHp = newMember.hp;
     newMember.fb = filliationCoefficient;
 
     return newMember;
@@ -141,10 +142,24 @@ function AppIndex() {
     return goodCount >= badCount ? 'good' : 'bad';
   };
 
-  const clearBattle = () => {
-    setClearingBattle(true);
+  const healHeroes = heroes => {
+    heroes.forEach(hero => (hero.hp = hero.originalHp));
+  };
+
+  const healTeams = () => {
+    teams.forEach(team => {
+      healHeroes(team.members);
+    });
+  };
+
+  const clearBattle = newTeams => {
     setBattleEnded(false);
-    formTeams();
+    if (newTeams) {
+      setClearingBattle(true);
+      formTeams();
+    } else {
+      healTeams();
+    }
     setRound(0);
   };
 

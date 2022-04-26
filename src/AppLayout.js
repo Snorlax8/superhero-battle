@@ -51,9 +51,14 @@ function App({
               <div className="text header"> Enviar resumen </div>
               <Mail mailBody={mailBody} />
               <div className="text header"> ¿Otra batalla? </div>
-              <button className="text" onClick={() => clearBattle()}>
-                Comenzar otra batalla
-              </button>
+              <div className="new-battle-buttons">
+                <button className="text" onClick={() => clearBattle(false)}>
+                  Comenzar otra batalla con los mismos héroes
+                </button>
+                <button className="text" onClick={() => clearBattle(true)}>
+                  Comenzar otra batalla con héroes diferentes
+                </button>
+              </div>
             </div>
           )}
         </div>
