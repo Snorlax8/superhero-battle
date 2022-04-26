@@ -5,7 +5,7 @@ This is the repository for the "Superhero Battle" frontend. The instructions on 
 
 ## Preconditions
 
-To run both this project and its backend, you need to have Node installed (version 13 and above recommended).
+To run both this project and its backend, you need to have Node installed (version 13.11 and above recommended).
 ### Running the backend
 As mentioned before, this repository consists of the frontend for the "Superhero Battle" application. Therefore, a precondition to be able to run this project is having its backend running, [whose repository can be found here](https://github.com/Snorlax8/superhero-battle-backend).
 
